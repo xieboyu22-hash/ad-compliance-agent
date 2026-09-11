@@ -1,0 +1,12 @@
+{
+  "name": "ad-compliance-agent",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/prepare-sites-build.mjs",
+    "test:syntax": "node scripts/check-html-syntax.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
