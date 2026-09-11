@@ -1,0 +1,13 @@
+.env
+__pycache__/
+*.pyc
+output/review_pipeline/*/
+.DS_Store
+.venv/
+venv/
+env/
+node_modules/
+data/
+output/
+notebooks/
+宝洁八大问-自我介绍与STAR回答.md
