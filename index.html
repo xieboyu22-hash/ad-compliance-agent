@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>广告宣传材料合规检查助手</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #eef2f1;
+      --panel: #ffffff;
+      --paper: #fbfaf6;
+      --ink: #18211f;
+      --line: #ccd7d2;
+      --text: #1d2b29;
+      --muted: #63716e;
+      --brand: #0b7f73;
+      --brand-dark: #075f56;
+      --danger: #b42318;
+      --danger-bg: #fff1ee;
+      --warn: #9c5b00;
+      --warn-bg: #fff4d7;
+      --info: #285c8f;
+      --info-bg: #eaf3ff;
+      --ok: #19734a;
+      --ok-bg: #e7f7ee;
+      --violet: #5c45a0;
+      --violet-bg: #f2edff;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(90deg, rgba(11, 127, 115, 0.08), transparent 34%),
+        linear-gradient(180deg, #f7f8f5 0%, var(--bg) 48%, #e9eeee 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(251, 250, 246, 0.94);
+      backdrop-filter: blur(10px);
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+
+    .title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--brand);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(380px, 0.9fr) minmax(460px, 1.1fr);
+      gap: 18px;
+      padding: 18px;
+      min-height: 0;
+    }
+
+    .panel {
+      min-height: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      overflow: hidden;
+      box-shadow: 0 18px 50px rgba(24, 33, 31, 0.08);
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+    }
+
+    .panel-head h2 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: 0;
+    }
+
+    .panel-body {
+      padding: 18px;
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field label,
+    .section-label {
+      color: #344054;
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    textarea,
+    select,
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 240px;
+      resize: vertical;
+      padding: 12px;
+      line-height: 1.7;
+    }
+
+    select,
+    input[type="text"],
+    input[type="file"] {
+      min-height: 42px;
+      padding: 8px 10px;
+    }
+
+    .inline-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .image-preview {
+      display: none;
+      width: 100%;
+      max-height: 280px;
+      object-fit: contain;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    .poster-upload {
+      display: grid;
+      gap: 10px;
+      border: 1px dashed rgba(180, 35, 24, 0.3);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fffafa;
+    }
+
+    .helper-text {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .is-hidden {
+      display: none !important;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 2px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 42px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 0 14px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(11, 127, 115, 0.22);
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-dark);
+    }
+
+    .btn-secondary {
+      border-color: #cbd5e1;
+    }
+
+    .btn-secondary:hover {
+      background: #f8fafc;
+    }
+
+    .rules {
+      display: grid;
+      gap: 8px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .rules-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .rule-row {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 10px;
+      align-items: start;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .rule-code {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .custom-rules {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .custom-rule-card {
+      display: grid;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfcfd;
+    }
+
+    .custom-rule-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 110px 72px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .custom-rule-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .result-panel {
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      height: 100%;
+    }
+
+    .result-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 18px;
+    }
+
+    .decision-board {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 20px;
+      border: 1px solid rgba(180, 35, 24, 0.22);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--danger);
+    }
+
+    .decision-kicker {
+      margin: 0 0 8px;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 750;
+    }
+
+    .decision-title {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.22;
+      letter-spacing: 0;
+    }
+
+    .decision-copy {
+      max-width: 660px;
+      margin: 8px 0 0;
+      color: var(--danger);
+      line-height: 1.65;
+    }
+
+    .decision-stamp {
+      display: grid;
+      place-items: center;
+      min-width: 124px;
+      min-height: 86px;
+      border: 1px solid rgba(180, 35, 24, 0.24);
+      border-radius: 8px;
+      color: var(--danger);
+      text-align: center;
+      font-weight: 800;
+      line-height: 1.35;
+      background: #fff6f4;
+    }
+
+    .summary-band {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 14px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+    }
+
+    .summary-title {
+      margin: 0 0 5px;
+      font-size: 18px;
+      font-weight: 750;
+      line-height: 1.4;
+    }
+
+    .summary-copy {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .counters {
+      display: grid;
+      grid-template-columns: repeat(4, 72px);
+      gap: 8px;
+    }
+
+    .counter {
+      appearance: none;
+      cursor: pointer;
+      min-height: 58px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 7px;
+      text-align: center;
+      background: #fff;
+    }
+
+    .counter strong {
+      display: block;
+      font-size: 19px;
+      line-height: 1.2;
+      color: var(--danger);
+    }
+
+    .counter span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .risk-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .insight-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.9fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .work-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .work-panel h3 {
+      margin: 0;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: var(--paper);
+      font-size: 15px;
+      letter-spacing: 0;
+    }
+
+    .rewrite-text {
+      margin: 0;
+      padding: 14px;
+      color: #1f2937;
+      font-size: 14px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    .style-note {
+      margin: 0;
+      padding: 12px 14px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .placeholder-list,
+    .evidence-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0;
+      padding: 0 14px 14px;
+      list-style: none;
+    }
+
+    .placeholder-list li,
+    .evidence-list li {
+      border: 1px solid #d5ded9;
+      border-radius: 8px;
+      padding: 6px 8px;
+      background: #f8faf8;
+      color: #384541;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .coverage-grid {
+      display: grid;
+      gap: 6px;
+      padding: 12px 14px 14px;
+    }
+
+    .coverage-row {
+      display: grid;
+      grid-template-columns: 58px minmax(0, 1fr) 84px;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .coverage-row strong {
+      color: var(--text);
+    }
+
+    .coverage-hit {
+      color: var(--danger);
+      font-weight: 800;
+    }
+
+    .coverage-clean {
+      color: var(--ok);
+      font-weight: 700;
+    }
+
+    .risk-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      overflow: hidden;
+      scroll-margin-top: 104px;
+    }
+
+    .risk-item-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .risk-rule {
+      font-weight: 750;
+    }
+
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 8px;
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .badge-high {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .badge-medium {
+      background: var(--warn-bg);
+      color: var(--warn);
+    }
+
+    .badge-low {
+      background: var(--info-bg);
+      color: var(--info);
+    }
+
+    .badge-unknown {
+      background: #f1f3f5;
+      color: #4b5563;
+    }
+
+    .badge-manual {
+      background: var(--violet-bg);
+      color: var(--violet);
+    }
+
+    .risk-content {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .risk-field {
+      display: grid;
+      grid-template-columns: 94px 1fr;
+      gap: 10px;
+    }
+
+    .risk-field b {
+      color: #475467;
+    }
+
+    .risk-text {
+      color: #111827;
+      font-weight: 650;
+    }
+
+    .empty {
+      display: grid;
+      place-items: center;
+      min-height: 320px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 8px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.7;
+      background: #fbfcfd;
+    }
+
+    .json-block {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .json-block summary {
+      cursor: pointer;
+      padding: 12px 14px;
+      background: #fbfcfd;
+      color: #344054;
+      font-weight: 700;
+    }
+
+    pre {
+      margin: 0;
+      max-height: 300px;
+      overflow: auto;
+      padding: 14px;
+      background: #101828;
+      color: #d1fadf;
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 18% 0%, rgba(11, 127, 115, 0.14), transparent 28%),
+        linear-gradient(180deg, #f8faf7 0%, #edf2ef 42%, #e5ece9 100%);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      padding: 18px max(28px, calc((100vw - 1540px) / 2 + 28px));
+      border-bottom: 1px solid rgba(30, 53, 49, 0.12);
+      background: rgba(250, 250, 246, 0.9);
+    }
+
+    .title {
+      display: grid;
+      gap: 3px;
+    }
+
+    .title h1 {
+      color: var(--ink);
+      font-size: 25px;
+      font-weight: 780;
+    }
+
+    .status {
+      min-height: 36px;
+      border: 1px solid rgba(11, 127, 115, 0.18);
+      border-radius: 8px;
+      padding: 0 12px;
+      background: rgba(255, 255, 255, 0.7);
+      color: #36514d;
+    }
+
+    .workspace {
+      width: min(1540px, 100%);
+      margin: 0 auto;
+      grid-template-columns: minmax(420px, 500px) minmax(520px, 1fr);
+      gap: 20px;
+      padding: 22px 28px 32px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid rgba(30, 53, 49, 0.12);
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 24px 70px rgba(24, 33, 31, 0.1);
+    }
+
+    .panel-head {
+      min-height: 66px;
+      border-bottom: 1px solid rgba(30, 53, 49, 0.1);
+      background:
+        linear-gradient(90deg, rgba(11, 127, 115, 0.08), transparent 52%),
+        #fffdfa;
+    }
+
+    .panel-head h2 {
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 780;
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    .field {
+      gap: 7px;
+    }
+
+    .field label,
+    .section-label {
+      color: #40524e;
+      font-size: 13px;
+      font-weight: 720;
+    }
+
+    textarea,
+    select,
+    input[type="text"],
+    input[type="file"] {
+      border: 1px solid rgba(62, 82, 78, 0.22);
+      background: #fffefb;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+    }
+
+    textarea:focus,
+    select:focus,
+    input[type="text"]:focus,
+    input[type="file"]:focus {
+      outline: 0;
+      border-color: rgba(11, 127, 115, 0.68);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(11, 127, 115, 0.12);
+    }
+
+    textarea {
+      min-height: 255px;
+      color: #14201e;
+    }
+
+    #imageNotes {
+      min-height: 116px !important;
+    }
+
+    .btn {
+      min-height: 40px;
+      border-radius: 8px;
+      font-weight: 720;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      min-width: 148px;
+      background: #0a766b;
+      box-shadow: 0 12px 24px rgba(10, 118, 107, 0.24);
+    }
+
+    .btn-secondary {
+      border-color: rgba(62, 82, 78, 0.2);
+      background: #ffffff;
+      color: #29403c;
+    }
+
+    .actions {
+      padding-top: 4px;
+    }
+
+    .rules {
+      margin-top: 20px;
+      border-top: 1px solid rgba(30, 53, 49, 0.1);
+    }
+
+    .rules-head {
+      margin-bottom: 8px;
+    }
+
+    .rule-row {
+      grid-template-columns: 66px 1fr;
+      border: 1px solid rgba(30, 53, 49, 0.08);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: rgba(248, 250, 248, 0.76);
+    }
+
+    .rule-code {
+      color: #0a766b;
+    }
+
+    .custom-rule-card {
+      border-color: rgba(11, 127, 115, 0.18);
+      background: #f7fbf8;
+    }
+
+    .result-panel {
+      position: sticky;
+      top: 88px;
+      max-height: calc(100vh - 110px);
+    }
+
+    .result-body {
+      padding: 20px;
+    }
+
+    .decision-board {
+      position: relative;
+      overflow: hidden;
+      min-height: 138px;
+      border: 1px solid rgba(180, 35, 24, 0.22);
+      background: #ffffff;
+      box-shadow: 0 18px 42px rgba(180, 35, 24, 0.08);
+    }
+
+    .decision-board::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 6px;
+      background: var(--danger);
+    }
+
+    .decision-kicker {
+      color: var(--danger);
+      font-size: 13px;
+    }
+
+    .decision-title {
+      max-width: 720px;
+      font-size: 34px;
+      font-weight: 820;
+      color: var(--danger);
+    }
+
+    .decision-copy {
+      max-width: 760px;
+      font-size: 15px;
+    }
+
+    .decision-stamp {
+      min-width: 132px;
+      min-height: 98px;
+      border-color: rgba(180, 35, 24, 0.24);
+      background: #fff6f4;
+      color: var(--danger);
+      font-size: 18px;
+    }
+
+    .summary-band {
+      border-color: rgba(30, 53, 49, 0.1);
+      background: #fffdfa;
+    }
+
+    .counter {
+      border-color: rgba(30, 53, 49, 0.1);
+      background: #ffffff;
+    }
+
+    .counter strong {
+      color: var(--danger);
+      font-size: 22px;
+    }
+
+    .counter:hover {
+      border-color: rgba(180, 35, 24, 0.3);
+      box-shadow: 0 10px 22px rgba(180, 35, 24, 0.08);
+    }
+
+    .insight-grid {
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+    }
+
+    .work-panel {
+      border-color: rgba(30, 53, 49, 0.1);
+      background: #ffffff;
+      box-shadow: 0 10px 28px rgba(24, 33, 31, 0.05);
+    }
+
+    .work-panel h3 {
+      border-bottom-color: rgba(30, 53, 49, 0.1);
+      background: #fffdfa;
+      color: #1f2d2a;
+      font-size: 15px;
+      font-weight: 780;
+    }
+
+    .rewrite-text {
+      color: #18211f;
+      font-size: 15px;
+      line-height: 1.9;
+    }
+
+    .placeholder-list li {
+      border-color: rgba(11, 127, 115, 0.2);
+      background: #edf8f5;
+      color: #075f56;
+      font-weight: 720;
+    }
+
+    .evidence-list li {
+      border-color: rgba(156, 91, 0, 0.18);
+      background: #fff8e6;
+      color: #7a4700;
+    }
+
+    .coverage-row {
+      grid-template-columns: 56px minmax(0, 1fr) 78px;
+      min-height: 26px;
+      border-bottom: 1px solid rgba(30, 53, 49, 0.07);
+    }
+
+    .coverage-row:last-child {
+      border-bottom: 0;
+    }
+
+    .risk-item {
+      border-color: rgba(30, 53, 49, 0.11);
+      box-shadow: 0 8px 24px rgba(24, 33, 31, 0.05);
+    }
+
+    .risk-item.is-focused-risk {
+      border-color: rgba(180, 35, 24, 0.55);
+      box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.12), 0 10px 28px rgba(180, 35, 24, 0.12);
+    }
+
+    .risk-item-head {
+      background: #fffdfa;
+    }
+
+    .risk-rule {
+      color: #1b2c28;
+    }
+
+    .badge {
+      border-radius: 8px;
+    }
+
+    .json-block {
+      border-color: rgba(30, 53, 49, 0.1);
+    }
+
+      @media (max-width: 980px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+        padding: 16px;
+      }
+
+      .result-panel {
+        position: static;
+        max-height: none;
+      }
+
+      .summary-band {
+        grid-template-columns: 1fr;
+      }
+
+      .decision-board,
+      .insight-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .decision-title {
+        font-size: 28px;
+      }
+
+      .counters {
+        grid-template-columns: repeat(4, minmax(60px, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .topbar,
+      .workspace {
+        padding: 14px;
+      }
+
+      .inline-grid,
+      .custom-rule-head,
+      .custom-rule-body,
+      .risk-field {
+        grid-template-columns: 1fr;
+      }
+
+      .risk-item-head {
+        flex-direction: column;
+      }
+
+      .badges {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="title">
+        <h1>广告宣传材料合规检查助手</h1>
+        <p>依据题目提供的广告审核规则 A-01 至 A-10 输出第一轮检查结果</p>
+      </div>
+      <div class="status"><span class="status-dot"></span><span id="serverStatus">本地 Agent 已连接</span></div>
+    </header>
+
+    <section class="workspace">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>待检查材料</h2>
+          <button class="btn btn-secondary" id="sampleBtn" type="button">填入自测样例</button>
+        </div>
+        <div class="panel-body">
+          <div class="form-grid">
+            <div class="inline-grid">
+              <div class="field">
+                <label for="materialType">材料类型</label>
+                <select id="materialType">
+                  <option value="poster">海报</option>
+                  <option value="moments">朋友圈文案</option>
+                  <option value="landing_page">活动页面</option>
+                  <option value="other">其他</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="imageQuality">图片状态</label>
+                <select id="imageQuality">
+                  <option value="clear">清晰完整</option>
+                  <option value="blurred">文字模糊</option>
+                  <option value="cropped">截图不完整</option>
+                  <option value="blocked">关键信息被遮挡</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field" id="contentField">
+              <label for="contentText">文案正文</label>
+              <textarea id="contentText" placeholder="粘贴海报、朋友圈文案或活动页文字"></textarea>
+            </div>
+
+            <div class="field" id="imageField">
+              <label for="imageInput">图片上传</label>
+              <div class="poster-upload">
+                <input id="imageInput" type="file" accept="image/*" />
+                <img class="image-preview" id="imagePreview" alt="上传图片预览" />
+                <div class="actions">
+                  <button class="btn btn-secondary" id="extractTextBtn" type="button">提取文字</button>
+                </div>
+                <p class="helper-text" id="ocrStatus">上传海报后点击“提取文字”，提取结果会用于合规检查。</p>
+              </div>
+            </div>
+
+            <div class="field" id="ocrField">
+              <label for="imageNotes">图片文字提取结果</label>
+              <textarea id="imageNotes" placeholder="如上传海报，请粘贴 OCR 文字或补充图片中可见的宣传语、价格、优惠限制等信息" style="min-height: 120px;"></textarea>
+            </div>
+
+            <div class="actions">
+              <button class="btn btn-primary" id="checkBtn" type="button">开始合规检查</button>
+              <button class="btn btn-secondary" id="clearBtn" type="button">清空</button>
+            </div>
+          </div>
+
+          <section class="rules" aria-label="规则使用说明">
+            <div class="rules-head">
+              <div class="section-label">规则使用说明</div>
+              <button class="btn btn-secondary" id="addRuleBtn" type="button">添加规则</button>
+            </div>
+            <div class="rule-row"><span class="rule-code">A-01</span><span>绝对化用语：最佳、第一、唯一、100% 等</span></div>
+            <div class="rule-row"><span class="rule-code">A-02</span><span>数据宣传：来源、统计口径、时间范围</span></div>
+            <div class="rule-row"><span class="rule-code">A-03</span><span>优惠有效期：折扣、满减、赠品起止日期</span></div>
+            <div class="rule-row"><span class="rule-code">A-04</span><span>优惠限制：商品、渠道、名额、叠加限制</span></div>
+            <div class="rule-row"><span class="rule-code">A-05</span><span>效果承诺：健康、美容、性能、收益效果</span></div>
+            <div class="rule-row"><span class="rule-code">A-06</span><span>敏感词：治疗、治愈、无副作用、零风险、稳赚</span></div>
+            <div class="rule-row"><span class="rule-code">A-07</span><span>对比贬损：竞品贬损或无法证明的全面优越比较</span></div>
+            <div class="rule-row"><span class="rule-code">A-08</span><span>免费/零元：押金、运费、自动续费等费用披露</span></div>
+            <div class="rule-row"><span class="rule-code">A-09</span><span>背书评价：用户、专家、机构背书真实性与授权</span></div>
+            <div class="rule-row"><span class="rule-code">A-10</span><span>证据不足：图片模糊、截图不全、信息不足</span></div>
+            <div class="custom-rules" id="customRules"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="panel result-panel">
+        <div class="panel-head">
+          <h2>检查结果</h2>
+          <span id="sourceLabel" class="badge badge-low">规则引擎</span>
+        </div>
+        <div class="result-body" id="resultBody">
+          <div class="empty">输入材料后点击“开始合规检查”<br />结果会按风险等级和对应规则展示</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    const contentText = document.getElementById("contentText");
+    const imageNotes = document.getElementById("imageNotes");
+    const imageInput = document.getElementById("imageInput");
+    const imagePreview = document.getElementById("imagePreview");
+    const imageQuality = document.getElementById("imageQuality");
+    const materialType = document.getElementById("materialType");
+    const contentField = document.getElementById("contentField");
+    const ocrField = document.getElementById("ocrField");
+    const ocrStatus = document.getElementById("ocrStatus");
+    const resultBody = document.getElementById("resultBody");
+    const serverStatus = document.getElementById("serverStatus");
+    const customRules = document.getElementById("customRules");
+    let imageIncluded = false;
+    let imageDataUrl = "";
+    let customRuleIndex = 0;
+
+    const sampleText = "全网第一美白精华，7天100%见效，限时满199减100，免费领取，用户一致好评，专家推荐，零风险无副作用。";
+
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files && imageInput.files[0];
+      imageIncluded = Boolean(file);
+      if (!file) {
+        imageDataUrl = "";
+        imagePreview.style.display = "none";
+        imagePreview.removeAttribute("src");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        imageDataUrl = String(reader.result || "");
+        imagePreview.src = imageDataUrl;
+        imagePreview.style.display = "block";
+        ocrStatus.textContent = "图片已上传，可点击“提取文字”。";
+      };
+      reader.readAsDataURL(file);
+    });
+
+    materialType.addEventListener("change", applyMaterialMode);
+    document.getElementById("extractTextBtn").addEventListener("click", extractImageText);
+
+    document.getElementById("sampleBtn").addEventListener("click", () => {
+      if (materialType.value === "poster") {
+        contentText.value = "";
+        imageNotes.value = sampleText;
+        ocrField.classList.remove("is-hidden");
+        ocrStatus.textContent = "已填入样例海报提取文字，可直接检查。";
+      } else {
+        contentText.value = sampleText;
+        imageNotes.value = "";
+      }
+      imageQuality.value = "clear";
+      runCheck();
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      contentText.value = "";
+      imageNotes.value = "";
+      imageInput.value = "";
+      imageIncluded = false;
+      imageDataUrl = "";
+      imagePreview.style.display = "none";
+      imagePreview.removeAttribute("src");
+      ocrStatus.textContent = "上传海报后点击“提取文字”，提取结果会用于合规检查。";
+      applyMaterialMode();
+      resultBody.innerHTML = '<div class="empty">输入材料后点击“开始合规检查”<br />结果会按风险等级和对应规则展示</div>';
+    });
+
+    document.getElementById("checkBtn").addEventListener("click", runCheck);
+    document.getElementById("addRuleBtn").addEventListener("click", () => addCustomRule());
+
+    async function runCheck() {
+      setLoading();
+      const payload = {
+        materialType: materialType.value,
+        contentText: contentText.value,
+        imageNotes: imageNotes.value,
+        imageIncluded,
+        imageQuality: imageQuality.value,
+        customRules: collectCustomRules()
+      };
+      try {
+        const apiUrl = location.protocol === "file:"
+          ? "http://127.0.0.1:8787/api/ad-compliance/check"
+          : "/api/ad-compliance/check";
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        serverStatus.textContent = "本地 Agent 已连接";
+        renderResult(data);
+      } catch (error) {
+        const data = runBrowserComplianceCheck(payload);
+        serverStatus.textContent = "外部演示模式";
+        renderResult(data);
+      }
+    }
+
+    function setLoading() {
+      resultBody.innerHTML = '<div class="empty">正在根据 A-01 至 A-10 规则检查...</div>';
+    }
+
+    function applyMaterialMode() {
+      const isPoster = materialType.value === "poster";
+      contentField.classList.toggle("is-hidden", isPoster);
+      ocrField.classList.toggle("is-hidden", isPoster && !imageNotes.value.trim());
+      document.querySelector('label[for="imageInput"]').textContent = isPoster ? "海报图片" : "图片上传";
+      document.getElementById("extractTextBtn").classList.toggle("is-hidden", !isPoster);
+      if (isPoster) {
+        contentText.value = "";
+      }
+    }
+
+    async function extractImageText() {
+      if (!imageDataUrl) {
+        ocrStatus.textContent = "请先上传海报图片。";
+        return;
+      }
+      ocrField.classList.remove("is-hidden");
+      imageNotes.value = "";
+      imageNotes.placeholder = "正在提取图片文字...";
+      ocrStatus.textContent = "正在提取图片文字...";
+      try {
+        const apiUrl = location.protocol === "file:"
+          ? "http://127.0.0.1:8787/api/ad-compliance/extract-image-text"
+          : "/api/ad-compliance/extract-image-text";
+        const response = await fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageDataUrl })
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        imageNotes.value = data.extracted_text || "";
+        imageNotes.placeholder = "可在这里校对或补充图片中的宣传文字";
+        const notes = Array.isArray(data.notes) && data.notes.length ? `；${data.notes.join("；")}` : "";
+        ocrStatus.textContent = data.extracted_text
+          ? `文字提取完成，置信度：${data.confidence || "medium"}${notes}`
+          : `未自动提取到文字${notes}。请手动补充后检查。`;
+      } catch (error) {
+        imageNotes.placeholder = "请手动粘贴图片文字后检查";
+        ocrStatus.textContent = "外部演示模式暂不调用视觉模型，请手动补充图片文字后检查。";
+      }
+    }
+
+    function addCustomRule(rule = {}) {
+      customRuleIndex += 1;
+      const card = document.createElement("div");
+      card.className = "custom-rule-card";
+      card.dataset.customRule = "true";
+      card.innerHTML = `
+        <div class="custom-rule-head">
+          <input type="text" data-rule-name placeholder="规则名称，例如：品牌禁用词" value="${escapeAttribute(rule.name || "")}" />
+          <select data-rule-level>
+            <option value="中">中风险</option>
+            <option value="高">高风险</option>
+            <option value="低">低风险</option>
+            <option value="无法判断">无法判断</option>
+          </select>
+          <button class="btn btn-secondary" type="button" data-remove-rule>删除</button>
+        </div>
+        <div class="custom-rule-body">
+          <input type="text" data-rule-keywords placeholder="命中关键词，用逗号分隔" value="${escapeAttribute(rule.keywords || "")}" />
+          <input type="text" data-rule-requirement placeholder="规则要求 / 修改依据" value="${escapeAttribute(rule.requirement || "")}" />
+        </div>
+      `;
+      customRules.appendChild(card);
+      card.querySelector("[data-rule-level]").value = rule.riskLevel || "中";
+      card.querySelector("[data-remove-rule]").addEventListener("click", () => card.remove());
+      card.querySelector("[data-rule-name]").focus();
+    }
+
+    function collectCustomRules() {
+      return Array.from(customRules.querySelectorAll("[data-custom-rule]"))
+        .map((card) => ({
+          name: card.querySelector("[data-rule-name]").value.trim(),
+          keywords: card.querySelector("[data-rule-keywords]").value.trim(),
+          requirement: card.querySelector("[data-rule-requirement]").value.trim(),
+          riskLevel: card.querySelector("[data-rule-level]").value
+        }))
+        .filter((rule) => rule.name || rule.keywords || rule.requirement);
+    }
+
+    const browserRules = {
+      "A-01": ["绝对化用语", "禁止“最佳、第一、唯一、100%”等无法证明的绝对化表述。"],
+      "A-02": ["数据宣传", "数据必须有来源、统计口径和时间范围。"],
+      "A-03": ["优惠有效期", "折扣、满减、赠品等必须写明起止日期。"],
+      "A-04": ["优惠限制", "必须披露适用商品/渠道、名额、叠加限制等主要条件。"],
+      "A-05": ["效果承诺", "不得承诺未经验证的健康、美容、性能或收益效果。"],
+      "A-06": ["敏感词", "“治疗、治愈、无副作用、零风险、稳赚”等必须拦截并人工复核。"],
+      "A-07": ["对比贬损", "不得贬损竞品或作无法证明的全面优越比较。"],
+      "A-08": ["免费/零元", "有押金、运费、自动续费等必要费用时必须显著披露。"],
+      "A-09": ["背书评价", "用户评价、专家/机构背书需有真实性与授权依据。"],
+      "A-10": ["证据不足", "图片文字模糊、截图不全时，不得判定完整合规，应要求原文件或完整页面。"]
+    };
+
+    const absoluteTerms = ["最佳", "最好", "最强", "最高级", "顶级", "极致", "第一", "全国第一", "全网第一", "行业第一", "唯一", "首个", "首选", "100%", "百分百", "永久", "永不"];
+    const sensitiveTerms = ["治疗", "治愈", "根治", "药到病除", "无副作用", "零风险", "稳赚", "保本", "包赚", "躺赚", "无风险"];
+    const effectTerms = ["见效", "有效", "改善", "修复", "逆龄", "抗衰", "美白", "祛斑", "瘦身", "减脂", "降脂", "降糖", "提升免疫", "收益", "回报", "转化率", "性能提升"];
+    const promiseTerms = ["保证", "承诺", "必", "一定", "即可", "立刻", "马上", "7天", "一周", "永久", "无效退款"];
+    const endorsementTerms = ["用户一致好评", "真实用户好评", "专家推荐", "专家背书", "权威认证", "机构认证", "官方认证", "达人推荐", "明星同款", "医生推荐", "国家级"];
+    const discountPatterns = [/\d+\s*折/, /满\s*\d+\s*减\s*\d+/, /立减\s*\d+/, /直降\s*\d+/, /买一送一/, /赠品/, /送\s*\d+/, /限时/, /限量/, /优惠/, /特价/];
+    const comparePatterns = [/吊打/, /碾压/, /秒杀/, /完胜/, /远超/, /优于/, /超过同行/, /比.+更好/, /比.+更强/, /竞品.+不/, /同行.+不/];
+    const freePatterns = [/免费/, /零元/, /0\s*元/, /不要钱/, /白送/, /免费领取/];
+
+    function runBrowserComplianceCheck(payload) {
+      const text = [payload.contentText, payload.imageNotes].map((value) => String(value || "").trim()).filter(Boolean).join("\n");
+      const items = [];
+
+      if (!text && !payload.imageIncluded) {
+        items.push(makeBrowserItem("未提供可检查的宣传内容", "证据不足", "A-10", "无法判断", "请提供完整文案、原图、活动页链接截图或可识别的图片文字后再检查。", true, "当前输入为空，无法完成第一轮合规判断。"));
+      } else if (payload.imageIncluded && !text) {
+        items.push(makeBrowserItem("已上传图片，但未提供可识别文字", "证据不足", "A-10", "无法判断", "请补充图片 OCR 文字、原始设计文件或完整页面；发布前需人工复核图片全部内容。", true, "系统无法仅凭图片文件名判断广告语、优惠条件和免责声明是否完整。"));
+      }
+
+      if (payload.imageIncluded && ["blurred", "cropped", "blocked"].includes(payload.imageQuality)) {
+        const qualityLabels = { blurred: "图片文字模糊", cropped: "截图不完整", blocked: "关键信息被遮挡" };
+        items.push(makeBrowserItem(qualityLabels[payload.imageQuality], "证据不足", "A-10", "无法判断", "请提供高清原图或完整活动页面；当前材料不得判定为完整合规。", true, "题目规则 A-10 要求图片模糊、截图不全时应要求原文件或完整页面。"));
+      }
+
+      if (text) {
+        const absoluteHits = matchingTerms(text, absoluteTerms);
+        if (absoluteHits.length) {
+          items.push(makeBrowserItem(snippet(text, absoluteHits[0]), "绝对化用语", "A-01", "高", `删除或改写“${absoluteHits.join("、")}”，改为可证明、可限定范围的表达，并补充依据。`, true, "命中无法直接证明的绝对化广告表述。"));
+        }
+
+        const dataMatches = Array.from(text.matchAll(/\d+(?:\.\d+)?\s*(?:%|％|倍|万|元|人|天|小时|分钟|款|件|单|名)/g));
+        if (dataMatches.length) {
+          const hasSource = containsAny(text, ["来源", "数据来自", "统计", "调研", "报告", "样本", "口径", "截至", "期间"]);
+          const hasTime = /\d{4}\s*年|\d{1,2}\s*月\s*\d{1,2}\s*日|\d{4}[-./]\d{1,2}|\d+\s*天|近\d+/.test(text);
+          if (!hasSource || !hasTime) {
+            const missing = [];
+            if (!hasSource) missing.push("数据来源/统计口径");
+            if (!hasTime) missing.push("时间范围");
+            items.push(makeBrowserItem(snippet(text, dataMatches[0][0]), "数据宣传", "A-02", "中", `补充${missing.join("、")}；无法提供依据时删除或弱化数据表达。`, true, "文案含具体数据，但未完整说明来源、统计口径和时间范围。"));
+          }
+        }
+
+        if (matchesAny(text, discountPatterns) && !/起止|有效期|截止|截至|到期|至\s*\d{1,2}\s*月|\d{1,2}\s*月\s*\d{1,2}\s*日/.test(text)) {
+          items.push(makeBrowserItem(firstMatchingSnippet(text, discountPatterns), "优惠有效期", "A-03", "中", "补充优惠活动起止日期，例如“活动时间：2026年9月10日00:00至2026年9月20日23:59”。", false, "文案出现折扣、满减、赠品或限时优惠，但未写明起止日期。"));
+        }
+
+        if (matchesAny(text, discountPatterns) && !containsAny(text, ["适用", "仅限", "渠道", "门店", "商品", "名额", "库存", "数量有限", "不可叠加", "每人", "限购"])) {
+          items.push(makeBrowserItem(firstMatchingSnippet(text, discountPatterns), "优惠限制披露不足", "A-04", "中", "补充适用商品、适用渠道、名额/库存、是否可与其他优惠叠加等主要限制条件。", false, "文案存在优惠信息，但未披露主要适用条件或限制。"));
+        }
+
+        const effectHits = matchingTerms(text, effectTerms)
+          .map((term) => [term, snippet(text, term)])
+          .filter(([term, around]) => containsAny(around, promiseTerms) || /\d+\s*天/.test(around));
+        if (effectHits.length) {
+          items.push(makeBrowserItem(effectHits[0][1], "效果承诺", "A-05", "高", `删除“${effectHits.map((hit) => hit[0]).join("、")}”相关确定性效果承诺，改为基于已验证证据的客观描述，并补充适用条件和验证依据。`, true, "命中健康、美容、性能或收益效果的确定性承诺。"));
+        }
+
+        const sensitiveHits = matchingTerms(text, sensitiveTerms);
+        if (sensitiveHits.length) {
+          items.push(makeBrowserItem(snippet(text, sensitiveHits[0]), "敏感词", "A-06", "高", `删除“${sensitiveHits.join("、")}”等高风险表述；如确需表达，应提交资质、证明材料并人工复核。`, true, "题目规则明确要求该类词汇必须拦截并人工复核。"));
+        }
+
+        if (matchesAny(text, comparePatterns)) {
+          const hasEvidence = containsAny(text, ["来源", "报告", "测试", "统计", "样本", "第三方", "公证", "依据"]);
+          items.push(makeBrowserItem(firstMatchingSnippet(text, comparePatterns), "对比贬损", "A-07", hasEvidence ? "中" : "高", "删除贬损竞品或全面优越比较；如需对比，应限定指标、样本、时间范围和数据来源。", true, "文案存在竞品比较或优越性描述，需确认是否可证明且不构成贬损。"));
+        }
+
+        if (matchesAny(text, freePatterns) && !containsAny(text, ["押金", "运费", "续费", "自动续费", "手续费", "服务费", "到期", "取消"])) {
+          items.push(makeBrowserItem(firstMatchingSnippet(text, freePatterns), "免费/零元费用披露不足", "A-08", "中", "如存在押金、运费、自动续费或其他必要费用，需在同屏显著披露；否则明确说明领取条件。", true, "出现免费/零元表达，但未说明是否存在必要费用或后续收费条件。"));
+        }
+
+        const hasAuthorization = containsAny(text, ["授权", "真实", "可查", "证书编号", "资质", "来源", "采访", "评价原文"]);
+        const endorsementHits = matchingTerms(text, endorsementTerms);
+        if (endorsementHits.length && !hasAuthorization) {
+          items.push(makeBrowserItem(snippet(text, endorsementHits[0]), "背书评价依据不足", "A-09", "中", `补充“${endorsementHits.join("、")}”相关评价真实性、专家/机构资质、授权证明和可追溯来源；无法提供时删除背书表述。`, true, "用户评价、专家或机构背书未见真实性与授权依据。"));
+        }
+
+        (payload.customRules || []).forEach((rule, index) => {
+          const keywords = splitKeywords(rule.keywords || "");
+          const hits = keywords.filter((keyword) => keyword && text.includes(keyword));
+          if (!hits.length) return;
+          const ruleId = `B-${String(index + 1).padStart(2, "0")}`;
+          const riskLevel = ["高", "中", "低", "无法判断"].includes(rule.riskLevel) ? rule.riskLevel : "中";
+          items.push({
+            risk_text: snippet(text, hits[0]),
+            risk_type: rule.name || "自定义业务规则",
+            rule_id: ruleId,
+            rule: `${ruleId} ${rule.name || "自定义业务规则"}`,
+            rule_requirement: rule.requirement || `命中自定义关键词：${hits.join("、")}`,
+            risk_level: riskLevel,
+            level_reason: levelReason(ruleId, riskLevel),
+            suggestion: "请按新增业务规则修改该表述；如规则解释或适用范围不明确，建议提交人工审核。",
+            rewrite_example: rewriteExample(ruleId),
+            evidence_needed: evidenceNeeded(ruleId),
+            need_manual_review: true,
+            manual_review_reason: manualReviewReason(ruleId, true),
+            reason: `命中新增规则关键词：${hits.join("、")}。`
+          });
+        });
+      }
+
+      const deduped = dedupeItems(items).sort(sortRiskItems);
+      const summary = {
+        high: deduped.filter((item) => item.risk_level === "高").length,
+        medium: deduped.filter((item) => item.risk_level === "中").length,
+        low: deduped.filter((item) => item.risk_level === "低").length,
+        uncertain: deduped.filter((item) => item.risk_level === "无法判断").length,
+        total: deduped.length
+      };
+      const manualReviewRequired = deduped.some((item) => item.need_manual_review);
+      const isCompliant = !deduped.length;
+      const publishDecision = publishDecisionFor(summary, isCompliant, manualReviewRequired);
+
+      return {
+        agent: "广告宣传材料合规检查助手",
+        material_type: payload.materialType,
+        is_compliant: isCompliant,
+        publish_decision: publishDecision,
+        decision_reason: decisionReason(summary, publishDecision),
+        manual_review_required: manualReviewRequired,
+        overall_conclusion: overallConclusion(summary, isCompliant, manualReviewRequired),
+        summary,
+        rules_source: rulesSource(payload.customRules || []),
+        rule_coverage: buildRuleCoverage(deduped, payload.customRules || []),
+        missing_evidence: buildMissingEvidence(deduped),
+        revision_example: buildRevisionExample(text, deduped, payload.materialType),
+        items: deduped
+      };
+    }
+
+    function makeBrowserItem(riskText, riskType, ruleId, riskLevel, suggestion, needManualReview, reason) {
+      const [name, requirement] = browserRules[ruleId];
+      return {
+        risk_text: String(riskText || "").trim(),
+        risk_type: riskType,
+        rule_id: ruleId,
+        rule: `${ruleId} ${name}`,
+        rule_requirement: requirement,
+        risk_level: riskLevel,
+        level_reason: levelReason(ruleId, riskLevel),
+        suggestion,
+        rewrite_example: rewriteExample(ruleId),
+        evidence_needed: evidenceNeeded(ruleId),
+        need_manual_review: needManualReview,
+        manual_review_reason: manualReviewReason(ruleId, needManualReview),
+        reason
+      };
+    }
+
+    function matchingTerms(text, terms) {
+      const matched = terms.filter((term) => text.includes(term)).sort((a, b) => b.length - a.length);
+      return matched.filter((term, index, arr) => !arr.slice(0, index).some((existing) => term !== existing && existing.includes(term)));
+    }
+
+    function containsAny(text, needles) {
+      return needles.some((needle) => text.includes(needle));
+    }
+
+    function matchesAny(text, patterns) {
+      return patterns.some((pattern) => pattern.test(text));
+    }
+
+    function firstMatchingSnippet(text, patterns) {
+      for (const pattern of patterns) {
+        const match = text.match(pattern);
+        if (match) return snippet(text, match[0]);
+      }
+      return text.slice(0, 80);
+    }
+
+    function snippet(text, needle, radius = 24) {
+      const raw = String(text || "");
+      const target = String(needle || "");
+      let index = raw.indexOf(target);
+      if (index < 0) index = 0;
+      const start = Math.max(0, index - radius);
+      const end = Math.min(raw.length, index + target.length + radius);
+      let value = raw.slice(start, end).replace(/\n/g, " ").trim();
+      if (start > 0) value = `...${value}`;
+      if (end < raw.length) value = `${value}...`;
+      return value;
+    }
+
+    function splitKeywords(value) {
+      return String(value || "").split(/[,，、\n;；]+/).map((item) => item.trim()).filter(Boolean);
+    }
+
+    function dedupeItems(items) {
+      const seen = new Set();
+      return items.filter((item) => {
+        const key = `${item.rule_id}|${item.risk_type}|${item.risk_text}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function sortRiskItems(a, b) {
+      const order = { "高": 0, "无法判断": 1, "中": 2, "低": 3 };
+      return (order[a.risk_level] ?? 9) - (order[b.risk_level] ?? 9) || a.rule_id.localeCompare(b.rule_id);
+    }
+
+    function levelReason(ruleId, riskLevel) {
+      if (riskLevel === "高") return "命中禁止性或必须人工复核的高风险表述，发布前需要修改并复核。";
+      if (riskLevel === "无法判断") return "现有输入信息不足，不能直接判定完整合规。";
+      if (riskLevel === "中") return "命中需要补充依据、条件或授权信息的规则，存在发布风险。";
+      return "风险较低，但建议在发布前补充说明或记录依据。";
+    }
+
+    function rewriteExample(ruleId) {
+      const examples = {
+        "A-01": "将绝对化表达改为“较受欢迎/适合部分场景/基于某项测试结果”。",
+        "A-02": "补充“数据来源、统计时间、样本量、统计口径”。",
+        "A-03": "补充“活动时间：YYYY年MM月DD日 HH:MM 至 YYYY年MM月DD日 HH:MM”。",
+        "A-04": "补充“适用商品、适用渠道、名额/库存、是否可叠加”。",
+        "A-05": "改为“基于测试观察到某项变化，实际效果因人而异”。",
+        "A-06": "删除敏感词，改为客观介绍产品属性或服务范围。",
+        "A-07": "限定比较指标、样本、时间和来源，删除贬损语气。",
+        "A-08": "显著说明领取条件和可能费用。",
+        "A-09": "补充评价来源、授权文件、专家/机构资质。",
+        "A-10": "补充高清原图、完整页面或可识别 OCR 文字。"
+      };
+      return examples[ruleId] || "按新增业务规则替换风险表述，并保留审批依据。";
+    }
+
+    function evidenceNeeded(ruleId) {
+      const map = {
+        "A-01": ["绝对化表述证明依据或替代表达审批记录"],
+        "A-02": ["数据来源", "统计口径", "统计时间范围", "样本量"],
+        "A-03": ["活动开始时间", "活动结束时间"],
+        "A-04": ["适用商品/渠道", "名额或库存", "叠加限制"],
+        "A-05": ["效果验证报告", "适用条件", "免责声明"],
+        "A-06": ["资质证明", "法务/合规人工复核记录"],
+        "A-07": ["对比指标", "第三方测试依据", "样本与时间范围"],
+        "A-08": ["领取条件", "押金/运费/自动续费等费用说明"],
+        "A-09": ["评价授权", "专家/机构资质", "评价来源"],
+        "A-10": ["高清原图", "完整活动页面", "可识别 OCR 文字"]
+      };
+      return map[ruleId] || ["新增规则依据", "内部审批记录"];
+    }
+
+    function manualReviewReason(ruleId, needManualReview) {
+      if (!needManualReview) return "规则命中项可通过补充条件或改写后再次自动检查。";
+      if (ruleId === "A-10") return "材料信息不足，必须由人工确认原始页面或图片内容。";
+      if (["A-01", "A-05", "A-06", "A-07"].includes(ruleId)) return "涉及禁止性、高风险或需要证明材料的表述，应人工复核。";
+      return "需要人工确认依据、授权或费用披露是否真实完整。";
+    }
+
+    function publishDecisionFor(summary, isCompliant, manualReviewRequired) {
+      if (isCompliant) return "可进入发布流程";
+      if (summary.high) return "禁止发布，修改后人工复核";
+      if (summary.uncertain) return "无法判断，补充材料后复核";
+      if (manualReviewRequired) return "建议人工复核后发布";
+      return "修改后可发布";
+    }
+
+    function decisionReason(summary, publishDecision) {
+      if (!summary.total) return "未命中题目规则 A-01 至 A-10 的明显风险。";
+      const parts = [];
+      if (summary.high) parts.push(`高风险 ${summary.high} 条`);
+      if (summary.uncertain) parts.push(`无法判断 ${summary.uncertain} 条`);
+      if (summary.medium) parts.push(`中风险 ${summary.medium} 条`);
+      if (summary.low) parts.push(`低风险 ${summary.low} 条`);
+      return `${publishDecision}：当前材料命中${parts.join("、")}。`;
+    }
+
+    function overallConclusion(summary, isCompliant, manualReviewRequired) {
+      if (isCompliant) return "未发现命中题目规则的明显风险，可进入下一发布流程。";
+      if (summary.high) return "存在高风险广告表述，发布前必须修改并人工审核。";
+      if (summary.uncertain) return "存在无法判断项，需补充原始材料或人工复核后再发布。";
+      if (manualReviewRequired) return "存在需人工确认的合规风险，建议复核依据材料后再发布。";
+      return "存在中低风险问题，建议按规则补充信息后再发布。";
+    }
+
+    function rulesSource(customRulesList) {
+      const count = Array.isArray(customRulesList) ? customRulesList.length : 0;
+      return count
+        ? `题目截图提供的广告审核规则 A-01 至 A-10，另含 ${count} 条页面新增业务规则`
+        : "题目截图提供的广告审核规则 A-01 至 A-10";
+    }
+
+    function buildRuleCoverage(items, customRulesList) {
+      const hitIds = new Set(items.map((item) => item.rule_id));
+      const rows = Object.entries(browserRules).map(([ruleId, [name, requirement]]) => ({
+        rule_id: ruleId,
+        rule: `${ruleId} ${name}`,
+        status: hitIds.has(ruleId) ? "命中" : "已检查未命中",
+        requirement
+      }));
+      (customRulesList || []).forEach((rule, index) => {
+        const ruleId = `B-${String(index + 1).padStart(2, "0")}`;
+        rows.push({
+          rule_id: ruleId,
+          rule: `${ruleId} ${rule.name || "自定义业务规则"}`,
+          status: hitIds.has(ruleId) ? "命中" : "已检查未命中",
+          requirement: rule.requirement || "页面新增业务规则。"
+        });
+      });
+      return rows;
+    }
+
+    function buildMissingEvidence(items) {
+      const evidence = [];
+      items.forEach((item) => (item.evidence_needed || []).forEach((need) => {
+        if (!evidence.includes(need)) evidence.push(need);
+      }));
+      return evidence;
+    }
+
+    function buildRevisionExample(text, items, selectedMaterialType) {
+      if (!text.trim()) {
+        return {
+          title: "完整修改实例",
+          text: "请先补充【完整宣传文案/图片 OCR 文字/活动页面截图】，再生成可发布版本。",
+          placeholders: ["完整宣传文案", "图片 OCR 文字", "活动页面截图"]
+        };
+      }
+      const hitRuleIds = new Set(items.map((item) => item.rule_id));
+      const tone = detectCopyTone(text, selectedMaterialType);
+      const product = inferProduct(text);
+      const lines = toneMatchedRevisionLines(product, tone, hitRuleIds, items);
+      const revisionText = lines.join("\n");
+      return {
+        title: "完整修改实例",
+        material_type: selectedMaterialType,
+        tone: tone.label,
+        style_note: tone.note,
+        text: revisionText,
+        placeholders: extractPlaceholders(revisionText),
+        usage_note: "【】中的内容需要业务方补充真实数据、证明材料或活动条件后才能发布。"
+      };
+    }
+
+    function inferProduct(text) {
+      const match = text.match(/([\u4e00-\u9fa5A-Za-z0-9]{2,16})?(精华|面霜|饮品|课程|服务|会员|套装|产品|活动)/);
+      if (!match) return "本产品";
+      if (match[2] === "活动") return "本次活动";
+      return ["产品", "服务", "会员"].includes(match[2]) ? `本${match[2]}` : `本${match[2]}产品`;
+    }
+
+    function detectCopyTone(text, selectedMaterialType) {
+      if (selectedMaterialType === "moments") return { kind: "social", label: "朋友圈文案风", note: "保留朋友圈的轻推荐、分享感和行动提示，但避免夸张承诺与无依据背书。" };
+      if (selectedMaterialType === "poster") return { kind: "poster", label: "海报短句口吻", note: "保留短句卖点和活动节奏，弱化绝对化与功效承诺。" };
+      if (selectedMaterialType === "landing_page") return { kind: "landing", label: "活动页说明口吻", note: "保留清晰的信息层级，补齐规则、费用和证据。" };
+      if (containsAny(text, ["直播", "今晚", "下单", "拍下", "直播间", "主播", "冲", "抢"])) return { kind: "live", label: "直播促销口吻", note: "保留即时活动感和行动号召，但补齐活动条件。" };
+      if (containsAny(text, ["分享", "种草", "姐妹", "推荐", "体验"])) return { kind: "social", label: "朋友圈文案风", note: "保留朋友圈的轻推荐、分享感和行动提示，但避免夸张承诺与无依据背书。" };
+      return { kind: "neutral", label: "宣传说明口吻", note: "保留原文宣传目的，改为可证明、有限定条件的表达。" };
+    }
+
+    function toneMatchedRevisionLines(product, tone, hitRuleIds, items) {
+      const hasEffectOrData = hitRuleIds.has("A-05") || hitRuleIds.has("A-02");
+      const hasDiscount = hitRuleIds.has("A-03") || hitRuleIds.has("A-04");
+      const hasFree = hitRuleIds.has("A-08");
+      const hasEndorsement = hitRuleIds.has("A-09");
+      const hasCustom = items.some((item) => item.rule_id.startsWith("B-"));
+      if (tone.kind === "poster") {
+        const lines = [`${product}活动开启`, "适合【适用人群/使用场景】"];
+        lines.push(hasEffectOrData ? "基于【数据来源/测试机构】于【统计时间范围】完成的【测试方法/统计口径】，结果为【客观数据结论】" : "产品信息以页面说明和实物包装为准");
+        if (hasEffectOrData) lines.push("实际体验因人而异");
+        if (hasDiscount) lines.push("活动时间：【开始时间】至【结束时间】", "优惠内容：【优惠内容】；适用范围：【适用商品/适用渠道】；数量限制：【名额或库存数量】；叠加规则：【叠加限制】");
+        if (hasFree) lines.push("领取条件：【领取条件】；可能费用：【运费/押金/服务费/自动续费说明】");
+        if (hasEndorsement) lines.push("评价/推荐依据：【评价来源/授权文件/资质证明】");
+        if (hasCustom) lines.push("品牌规则替代表达：【风险词替代表达】；审批记录：【内部审批记录】");
+        return lines;
+      }
+      if (tone.kind === "social") {
+        const lines = [`最近关注到${product}，适合【适用人群/使用场景】的朋友可以了解一下。`];
+        lines.push(hasEffectOrData ? "卖点我会看【数据来源/测试机构】在【统计时间范围】按【测试方法/统计口径】得到的【客观数据结论】，具体体验还是因人而异。" : "感兴趣的话可以先看清楚页面说明、使用方式和适用范围，再决定是否参与。");
+        if (hasDiscount) lines.push("这次活动是【优惠内容】，时间【开始时间】到【结束时间】，适用【适用商品/适用渠道】，名额【名额或库存数量】，叠加规则看【叠加限制】。");
+        if (hasFree) lines.push("领取前记得确认【领取条件】，以及是否涉及【运费/押金/服务费/自动续费说明】。");
+        if (hasEndorsement) lines.push("评价或推荐信息以【评价来源】、【授权文件】和【资质证明】为准，我这里不替大家做绝对判断。");
+        if (hasCustom) lines.push("原来那句【风险词替代表达】建议换成更稳妥的说法，相关依据保留【内部审批记录】。");
+        return lines;
+      }
+      const lines = [`${product}适用于【适用人群/使用场景】。`];
+      lines.push(hasEffectOrData ? "产品相关数据或效果说明基于【数据来源/测试机构】在【统计时间范围】对【样本量】进行的【测试方法/统计口径】，结果为【客观数据结论】；实际体验因人而异。" : "产品特点请以页面披露信息、实物包装和实际体验为准。");
+      if (hasDiscount) lines.push("活动时间为【开始时间】至【结束时间】；优惠内容为【优惠内容】；适用商品为【适用商品】；适用渠道为【适用渠道】；名额/库存为【名额或库存数量】；叠加规则为【是否可与其他优惠叠加】。");
+      if (hasFree) lines.push("领取或参与条件为【领取条件】，需支付费用为【运费/押金/服务费/自动续费说明】。");
+      if (hasEndorsement) lines.push("用户评价来源为【评价来源】，授权证明为【授权文件】，专家/机构资质为【资质证明】。");
+      if (hasCustom) lines.push("请根据新增规则确认【品牌禁用词替代表达/行业资质/内部审批记录】。");
+      return lines;
+    }
+
+    function extractPlaceholders(text) {
+      return Array.from(text.matchAll(/【([^】]+)】/g)).map((match) => match[1]).filter((item, index, arr) => arr.indexOf(item) === index);
+    }
+
+    function renderResult(data) {
+      const summary = data.summary || { high: 0, medium: 0, low: 0, uncertain: 0 };
+      const title = data.is_compliant ? "未发现明显风险" : "发现合规风险";
+      const items = Array.isArray(data.items) ? data.items : [];
+      const itemHtml = items.length
+        ? items.map(renderRiskItem).join("")
+        : '<div class="empty">未命中题目规则中的明显风险</div>';
+
+      resultBody.innerHTML = `
+        <section class="decision-board">
+          <div>
+            <p class="decision-kicker">发布决策</p>
+            <h3 class="decision-title">${escapeHtml(data.publish_decision || title)}</h3>
+          </div>
+          <div class="decision-stamp">${data.manual_review_required ? "需人工<br>复核" : "可进入<br>发布流程"}</div>
+        </section>
+        <section class="summary-band">
+          <div>
+            <p class="summary-title">${escapeHtml(title)}</p>
+            <p class="summary-copy">${escapeHtml(data.overall_conclusion || "")}</p>
+            <p class="summary-copy">人工审核：${data.manual_review_required ? "需要" : "暂不需要"}；规则来源：${escapeHtml(data.rules_source || "")}</p>
+          </div>
+          <div class="counters">
+            ${renderCounter("高", summary.high, "高")}
+            ${renderCounter("中", summary.medium, "中")}
+            ${renderCounter("低", summary.low, "低")}
+            ${renderCounter("无法", summary.uncertain, "无法判断")}
+          </div>
+        </section>
+        <section class="insight-grid">
+          ${renderRevisionExample(data.revision_example)}
+          <div>
+            ${renderEvidence(data.missing_evidence)}
+            ${renderCoverage(data.rule_coverage)}
+          </div>
+        </section>
+        <section class="risk-list">${itemHtml}</section>
+        <details class="json-block">
+          <summary>结构化 JSON 输出</summary>
+          <pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>
+        </details>
+      `;
+      bindCounterJumps();
+    }
+
+    function renderRevisionExample(revision) {
+      const data = revision || {};
+      const placeholders = Array.isArray(data.placeholders) ? data.placeholders : [];
+      return `
+        <article class="work-panel">
+          <h3>${escapeHtml(data.title || "完整修改实例")}</h3>
+          ${data.tone ? `<p class="style-note">原文语气：${escapeHtml(data.tone)}。${escapeHtml(data.style_note || "")}</p>` : ""}
+          <p class="rewrite-text">${escapeHtml(data.text || "暂无可生成的修改实例。")}</p>
+          ${placeholders.length ? `<ul class="placeholder-list">${placeholders.map((item) => `<li>【${escapeHtml(item)}】</li>`).join("")}</ul>` : ""}
+        </article>
+      `;
+    }
+
+    function renderEvidence(evidence) {
+      const items = Array.isArray(evidence) ? evidence : [];
+      return `
+        <article class="work-panel" style="margin-bottom: 12px;">
+          <h3>待补充资料</h3>
+          ${items.length
+            ? `<ul class="evidence-list" style="padding-top: 14px;">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
+            : '<p class="rewrite-text">暂无必须补充的资料。</p>'}
+        </article>
+      `;
+    }
+
+    function renderCoverage(coverage) {
+      const rows = Array.isArray(coverage) ? coverage : [];
+      return `
+        <article class="work-panel">
+          <h3>规则覆盖矩阵</h3>
+          <div class="coverage-grid">
+            ${rows.map((row) => `
+              <div class="coverage-row">
+                <strong>${escapeHtml(row.rule_id || "")}</strong>
+                <span>${escapeHtml((row.rule || "").replace(row.rule_id || "", "").trim())}</span>
+                <span class="${row.status === "命中" ? "coverage-hit" : "coverage-clean"}">${escapeHtml(row.status || "")}</span>
+              </div>
+            `).join("")}
+          </div>
+        </article>
+      `;
+    }
+
+    function renderCounter(label, value, level) {
+      return `<button class="counter" type="button" data-jump-level="${escapeAttribute(level)}"><strong>${Number(value || 0)}</strong><span>${label}</span></button>`;
+    }
+
+    function bindCounterJumps() {
+      resultBody.querySelectorAll("[data-jump-level]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const level = button.dataset.jumpLevel;
+          const target = Array.from(resultBody.querySelectorAll("[data-risk-level]"))
+            .find((card) => card.dataset.riskLevel === level);
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            target.classList.add("is-focused-risk");
+            window.setTimeout(() => target.classList.remove("is-focused-risk"), 1200);
+          }
+        });
+      });
+    }
+
+    function renderRiskItem(item) {
+      const levelClass = {
+        "高": "badge-high",
+        "中": "badge-medium",
+        "低": "badge-low",
+        "无法判断": "badge-unknown"
+      }[item.risk_level] || "badge-low";
+
+      return `
+        <article class="risk-item" data-risk-level="${escapeAttribute(item.risk_level || "")}">
+          <div class="risk-item-head">
+            <div>
+              <div class="risk-rule">${escapeHtml(item.rule || "")}</div>
+              <div class="summary-copy">${escapeHtml(item.risk_type || "")}</div>
+            </div>
+            <div class="badges">
+              <span class="badge ${levelClass}">${escapeHtml(item.risk_level || "")}</span>
+              ${item.need_manual_review ? '<span class="badge badge-manual">人工审核</span>' : ""}
+            </div>
+          </div>
+          <div class="risk-content">
+            ${renderField("风险原文", item.risk_text, "risk-text")}
+            ${renderField("对应规则", item.rule_requirement)}
+            ${renderField("定级理由", item.level_reason)}
+            ${renderField("修改建议", item.suggestion)}
+            ${renderField("替换示例", item.rewrite_example)}
+            ${renderField("人工原因", item.manual_review_reason)}
+            ${renderField("判断原因", item.reason)}
+          </div>
+        </article>
+      `;
+    }
+
+    function renderField(label, value, className = "") {
+      return `
+        <div class="risk-field">
+          <b>${escapeHtml(label)}</b>
+          <span class="${className}">${escapeHtml(value || "-")}</span>
+        </div>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replaceAll("`", "&#096;");
+    }
+
+    applyMaterialMode();
+  </script>
+</body>
+</html>
