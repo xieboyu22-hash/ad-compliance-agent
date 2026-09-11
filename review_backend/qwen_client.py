@@ -1,7 +1,7 @@
-"""Qwen-compatible LLM client for the risk review assistant.
+"""OpenAI-compatible LLM client for the risk review assistant.
 
-This module uses the OpenAI-compatible DashScope HTTP API with only Python's
-standard library, so the prototype can run without installing extra packages.
+This module uses OpenAI-compatible HTTP APIs with only Python's standard
+library, so the prototype can run without installing extra packages.
 """
 
 from __future__ import annotations
@@ -16,6 +16,9 @@ from typing import Any, Dict, List, Optional
 
 DEFAULT_MODEL = "qwen-plus"
 DEFAULT_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+DEFAULT_DEEPSEEK_MODEL = "deepseek-chat"
+DEFAULT_DEEPSEEK_VISION_MODEL = "deepseek-v4-flash-vision-exp"
+DEFAULT_DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 ENV_LOADED = False
 
 
@@ -42,29 +45,49 @@ def load_env(path: str | Path = ".env") -> None:
 
 def get_qwen_configured() -> bool:
     load_env()
-    return bool(os.getenv("QWEN_API_KEY") or os.getenv("DASHSCOPE_API_KEY"))
+    return bool(os.getenv("DEEPSEEK_API_KEY") or os.getenv("QWEN_API_KEY") or os.getenv("DASHSCOPE_API_KEY"))
 
 
 def get_qwen_status() -> Dict[str, Any]:
     load_env()
-    api_key = os.getenv("QWEN_API_KEY") or os.getenv("DASHSCOPE_API_KEY")
+    provider, api_key, base_url, model = _resolve_provider_config()
     return {
         "configured": bool(api_key),
-        "model": os.getenv("QWEN_MODEL", DEFAULT_MODEL),
-        "base_url": os.getenv("QWEN_BASE_URL", DEFAULT_BASE_URL),
+        "provider": provider,
+        "model": model,
+        "vision_model": _resolve_provider_config(vision=True)[3],
+        "base_url": base_url,
         "temperature": float(os.getenv("QWEN_TEMPERATURE", "0.2")),
     }
 
 
-def _chat_completion(messages: List[Dict[str, Any]], model: Optional[str] = None) -> str:
-    load_env()
-    api_key = os.getenv("QWEN_API_KEY") or os.getenv("DASHSCOPE_API_KEY")
-    if not api_key:
-        raise RuntimeError("QWEN_API_KEY or DASHSCOPE_API_KEY is not configured")
+def _resolve_provider_config(vision: bool = False) -> tuple[str, Optional[str], str, str]:
+    if os.getenv("DEEPSEEK_API_KEY"):
+        model = os.getenv("DEEPSEEK_VISION_MODEL" if vision else "DEEPSEEK_MODEL")
+        return (
+            "DeepSeek",
+            os.getenv("DEEPSEEK_API_KEY"),
+            os.getenv("DEEPSEEK_BASE_URL", DEFAULT_DEEPSEEK_BASE_URL),
+            model or (DEFAULT_DEEPSEEK_VISION_MODEL if vision else DEFAULT_DEEPSEEK_MODEL),
+        )
+    model = os.getenv("QWEN_VISION_MODEL" if vision else "QWEN_MODEL")
+    return (
+        "Qwen",
+        os.getenv("QWEN_API_KEY") or os.getenv("DASHSCOPE_API_KEY"),
+        os.getenv("QWEN_BASE_URL", DEFAULT_BASE_URL),
+        model or ("qwen-vl-plus" if vision else DEFAULT_MODEL),
+    )
 
-    base_url = os.getenv("QWEN_BASE_URL", DEFAULT_BASE_URL).rstrip("/")
+
+def _chat_completion(messages: List[Dict[str, Any]], model: Optional[str] = None, vision: bool = False) -> str:
+    load_env()
+    provider, api_key, base_url, default_model = _resolve_provider_config(vision=vision)
+    if not api_key:
+        raise RuntimeError("DEEPSEEK_API_KEY, QWEN_API_KEY or DASHSCOPE_API_KEY is not configured")
+
+    base_url = base_url.rstrip("/")
     payload = {
-        "model": model or os.getenv("QWEN_MODEL", DEFAULT_MODEL),
+        "model": model or default_model,
         "messages": messages,
         "temperature": float(os.getenv("QWEN_TEMPERATURE", "0.2")),
     }
@@ -82,19 +105,20 @@ def _chat_completion(messages: List[Dict[str, Any]], model: Optional[str] = None
             data = json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"Qwen HTTP {exc.code}: {detail}") from exc
+        raise RuntimeError(f"{provider} HTTP {exc.code}: {detail}") from exc
     except urllib.error.URLError as exc:
-        raise RuntimeError(f"Qwen request failed: {exc.reason}") from exc
+        raise RuntimeError(f"{provider} request failed: {exc.reason}") from exc
 
     return data["choices"][0]["message"]["content"] or ""
 
 
 def extract_image_text(image_data_url: str) -> Dict[str, Any]:
-    """Extract marketing copy from a poster image with a Qwen vision model."""
+    """Extract marketing copy from a poster image with a vision model."""
 
     if not image_data_url.startswith("data:image/"):
         raise ValueError("imageDataUrl must be a data:image/* URL")
 
+    provider, _, _, vision_model = _resolve_provider_config(vision=True)
     content = _chat_completion(
         [
             {
@@ -126,10 +150,12 @@ def extract_image_text(image_data_url: str) -> Dict[str, Any]:
                 ],
             },
         ],
-        model=os.getenv("QWEN_VISION_MODEL", "qwen-vl-plus"),
+        model=vision_model,
+        vision=True,
     )
     data = _extract_json(content)
     return {
+        "source": f"{provider.lower()}-vision",
         "extracted_text": str(data.get("extracted_text") or "").strip(),
         "confidence": str(data.get("confidence") or "medium"),
         "notes": data.get("notes") if isinstance(data.get("notes"), list) else [],

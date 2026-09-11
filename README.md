@@ -37,7 +37,16 @@ POST /api/ad-compliance/check
 POST /api/ad-compliance/extract-image-text
 ```
 
-海报文字提取优先使用 Qwen 视觉模型。若未配置 `QWEN_API_KEY` 或 `DASHSCOPE_API_KEY`，页面会提示手动补充图片文字，检查流程仍可使用本地规则引擎运行。
+海报文字提取支持 DeepSeek Vision 或 Qwen 视觉模型。优先读取 `DEEPSEEK_API_KEY`，也支持 `QWEN_API_KEY` 或 `DASHSCOPE_API_KEY`。若未配置可用视觉模型，页面会提示手动补充图片文字，检查流程仍可使用规则引擎运行。
+
+DeepSeek 本地演示配置示例：
+
+```text
+DEEPSEEK_API_KEY=你的 DeepSeek Key
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_VISION_MODEL=deepseek-v4-flash-vision-exp
+```
 
 ## 规则来源
 

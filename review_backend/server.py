@@ -111,13 +111,25 @@ class ReviewHandler(BaseHTTPRequestHandler):
                     "source": "manual",
                     "extracted_text": "",
                     "confidence": "low",
-                    "notes": ["未配置 QWEN_API_KEY 或 DASHSCOPE_API_KEY，请手动粘贴图片文字后检查。"],
+                    "notes": ["未配置 DEEPSEEK_API_KEY、QWEN_API_KEY 或 DASHSCOPE_API_KEY，请手动粘贴图片文字后检查。"],
                 },
             )
             return
-        result = extract_image_text(image_data_url)
-        result["source"] = "qwen-vision"
-        _json_response(self, HTTPStatus.OK, result)
+        try:
+            result = extract_image_text(image_data_url)
+            result.setdefault("source", "vision-model")
+            _json_response(self, HTTPStatus.OK, result)
+        except Exception as exc:  # pragma: no cover - external model/runtime guard
+            _json_response(
+                self,
+                HTTPStatus.OK,
+                {
+                    "source": "qwen-vision-error",
+                    "extracted_text": "",
+                    "confidence": "low",
+                    "notes": [f"视觉模型调用失败：{exc}"],
+                },
+            )
 
     def log_message(self, fmt: str, *args: Any) -> None:
         return
@@ -130,7 +142,7 @@ def main() -> None:
     args = parser.parse_args()
     server = ThreadingHTTPServer((args.host, args.port), ReviewHandler)
     print(f"Risk review backend listening on http://{args.host}:{args.port}")
-    print("Set QWEN_API_KEY or DASHSCOPE_API_KEY to enable Qwen responses.")
+    print("Set DEEPSEEK_API_KEY, QWEN_API_KEY or DASHSCOPE_API_KEY to enable vision OCR.")
     server.serve_forever()
 
 
